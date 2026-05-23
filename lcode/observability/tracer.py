@@ -14,8 +14,6 @@ from typing import Any
 import structlog
 from loguru import logger as loguru_logger
 
-from lcode.core.config import settings
-
 # Context variables for trace propagation
 _trace_id: ContextVar[str | None] = ContextVar("trace_id", default=None)
 _span_id: ContextVar[str | None] = ContextVar("span_id", default=None)

@@ -135,10 +135,7 @@ class ToolRegistry:
         if not tool:
             raise ValueError(f"Tool '{name}' not found.")
 
-        if isinstance(arguments, str):
-            kwargs = json.loads(arguments)
-        else:
-            kwargs = arguments
+        kwargs = json.loads(arguments) if isinstance(arguments, str) else arguments
 
         return await tool.call(**kwargs)
 

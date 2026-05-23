@@ -3,8 +3,6 @@
 import asyncio
 import json
 import math
-import urllib.parse
-from typing import Any
 
 from lcode.tools.registry import tool_registry
 
@@ -75,6 +73,7 @@ async def web_search(query: str, num_results: int = 5) -> str:
     Note: This is a simplified implementation. In production,
     you might want to use a proper search API or scraping.
     """
+    import urllib.parse
     import urllib.request
     from html.parser import HTMLParser
 
@@ -106,20 +105,20 @@ async def web_search(query: str, num_results: int = 5) -> str:
         in_snippet = False
 
         class DDGParser(HTMLParser):
-            def handle_starttag(self, tag, attrs):
+            def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
                 nonlocal in_result, in_title, in_snippet
                 attrs_dict = dict(attrs)
-                cls = attrs_dict.get("class", "")
+                cls: str = str(attrs_dict.get("class", "") or "")
 
                 if "result" in cls and tag == "div":
                     in_result = True
                 if in_result and tag == "a" and "result__a" in cls:
                     in_title = True
-                    current["url"] = attrs_dict.get("href", "")
+                    current["url"] = str(attrs_dict.get("href", "") or "")
                 if in_result and tag == "a" and "result__snippet" in cls:
                     in_snippet = True
 
-            def handle_endtag(self, tag):
+            def handle_endtag(self, tag: str) -> None:
                 nonlocal in_result, in_title, in_snippet
                 if in_title and tag == "a":
                     in_title = False
@@ -131,7 +130,7 @@ async def web_search(query: str, num_results: int = 5) -> str:
                     current["snippet"] = ""
                     current["url"] = ""
 
-            def handle_data(self, data):
+            def handle_data(self, data: str) -> None:
                 if in_title:
                     current["title"] += data
                 if in_snippet:

@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lcode.mcp.server import MCPServer
-from lcode.observability.tracer import TraceSpan, Tracer
+from lcode.observability.tracer import Tracer
 from lcode.plugins.loader import PluginLoader, SkillSystem
 from lcode.tools.registry import ToolRegistry
 from lcode.web.app import app
@@ -120,18 +120,19 @@ class TestPluginSystem:
         """Test async skill execution."""
         skills = SkillSystem()
 
-        async def async_skill(name: str) -> str:
-            return f"Hello, {name}"
+        async def async_skill(person: str) -> str:
+            return f"Hello, {person}"
 
         skills.register_skill("greet", async_skill)
-        result = await skills.execute_skill("greet", name="World")
+        result = await skills.execute_skill("greet", person="World")
         assert result == "Hello, World"
 
-    def test_skill_not_found(self) -> None:
+    @pytest.mark.asyncio
+    async def test_skill_not_found(self) -> None:
         """Test error when skill is not found."""
         skills = SkillSystem()
         with pytest.raises(ValueError, match="not found"):
-            skills.execute_skill("nonexistent")
+            await skills.execute_skill("nonexistent")
 
 
 class TestDockerConfig:
@@ -140,11 +141,13 @@ class TestDockerConfig:
     def test_dockerfile_exists(self) -> None:
         """Test that Dockerfile exists."""
         from pathlib import Path
+
         dockerfile = Path(__file__).parent.parent / "docker" / "Dockerfile"
         assert dockerfile.exists()
 
     def test_docker_compose_exists(self) -> None:
         """Test that docker-compose.yml exists."""
         from pathlib import Path
+
         compose = Path(__file__).parent.parent / "docker" / "docker-compose.yml"
         assert compose.exists()

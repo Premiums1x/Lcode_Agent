@@ -77,12 +77,14 @@ class TestAgentManager:
     @pytest.mark.asyncio
     async def test_execute_single_task(self) -> None:
         """Test executing a single task."""
-        llm = MockLLMProvider([
-            LLMResponse(
-                content='{"tasks": [{"id": "1", "description": "Say hello", "agent": "any"}]}',
-                model="mock",
-            ),
-        ])
+        llm = MockLLMProvider(
+            [
+                LLMResponse(
+                    content='{"tasks": [{"id": "1", "description": "Say hello", "agent": "any"}]}',
+                    model="mock",
+                ),
+            ]
+        )
         manager = AgentManager(llm=llm)
         agent = ChatAgent(name="greeter", llm=llm)
         manager.register_agent(agent)
@@ -95,12 +97,14 @@ class TestAgentManager:
     @pytest.mark.asyncio
     async def test_plan_decomposition(self) -> None:
         """Test task decomposition planning."""
-        llm = MockLLMProvider([
-            LLMResponse(
-                content='{"tasks": [{"id": "1", "description": "Step 1"}, {"id": "2", "description": "Step 2"}]}',
-                model="mock",
-            ),
-        ])
+        llm = MockLLMProvider(
+            [
+                LLMResponse(
+                    content='{"tasks": [{"id": "1", "description": "Step 1"}, {"id": "2", "description": "Step 2"}]}',
+                    model="mock",
+                ),
+            ]
+        )
         manager = AgentManager(llm=llm)
         agent = ChatAgent(name="worker", llm=llm)
         manager.register_agent(agent)

@@ -5,7 +5,6 @@ The agent thinks, decides to use a tool, observes the result,
 and repeats until it has a final answer.
 """
 
-import json
 from typing import Any
 
 from lcode.agents.base import BaseAgent
@@ -32,6 +31,10 @@ class ReActAgent(BaseAgent):
         super().__init__(name, llm, system_prompt)
         self.tool_registry = tool_registry
         self.max_iterations = max_iterations
+
+    def _setup_events(self) -> None:
+        """Subscribe to relevant events."""
+        pass
 
     async def run(self, user_input: str, **kwargs: Any) -> LLMResponse:
         """Run the ReAct loop.

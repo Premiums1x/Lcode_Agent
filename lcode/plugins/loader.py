@@ -17,7 +17,9 @@ class PluginLoader:
     register tools or skills.
     """
 
-    def __init__(self, plugin_dir: Path | None = None, registry: ToolRegistry | None = None) -> None:
+    def __init__(
+        self, plugin_dir: Path | None = None, registry: ToolRegistry | None = None
+    ) -> None:
         self.plugin_dir = plugin_dir or settings.plugin_dir
         self.registry = registry or tool_registry
         self.loaded_plugins: list[str] = []

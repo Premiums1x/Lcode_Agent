@@ -12,7 +12,9 @@ from lcode.core.config import settings
 class VectorStore:
     """ChromaDB-based vector store for document retrieval."""
 
-    def __init__(self, collection_name: str = "lcode_docs", persist_dir: Path | None = None) -> None:
+    def __init__(
+        self, collection_name: str = "lcode_docs", persist_dir: Path | None = None
+    ) -> None:
         self.persist_dir = persist_dir or settings.vector_db_path
         self.persist_dir.mkdir(parents=True, exist_ok=True)
 
@@ -27,7 +29,9 @@ class VectorStore:
             metadata={"hnsw:space": "cosine"},
         )
 
-    def add_documents(self, documents: list[Any], embeddings: list[list[float]] | None = None) -> None:
+    def add_documents(
+        self, documents: list[Any], embeddings: list[list[float]] | None = None
+    ) -> None:
         """Add documents with optional pre-computed embeddings.
 
         Args:
@@ -48,7 +52,7 @@ class VectorStore:
             documents=texts,
             metadatas=metadatas,
             ids=ids,
-            embeddings=embeddings,
+            embeddings=embeddings,  # type: ignore[arg-type]
         )
 
     def query(
@@ -74,18 +78,25 @@ class VectorStore:
             embedding = provider.embed([query_text])[0]
 
         results = self.collection.query(
-            query_embeddings=[embedding],
+            query_embeddings=[embedding],  # type: ignore[arg-type]
             n_results=top_k,
         )
 
         output = []
-        for i in range(len(results["ids"][0])):
-            output.append({
-                "id": results["ids"][0][i],
-                "content": results["documents"][0][i],
-                "metadata": results["metadatas"][0][i] if results["metadatas"] else {},
-                "distance": results["distances"][0][i] if results["distances"] else 0,
-            })
+        ids = results.get("ids", [[]])
+        documents = results.get("documents", [[]])
+        metadatas = results.get("metadatas", [[]])
+        distances = results.get("distances", [[]])
+        if ids and ids[0]:
+            for i in range(len(ids[0])):
+                output.append(
+                    {
+                        "id": ids[0][i],
+                        "content": documents[0][i] if documents else "",
+                        "metadata": metadatas[0][i] if metadatas and metadatas[0] else {},
+                        "distance": distances[0][i] if distances and distances[0] else 0,
+                    }
+                )
         return output
 
     def delete_collection(self) -> None:

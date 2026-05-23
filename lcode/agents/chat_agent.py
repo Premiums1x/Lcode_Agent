@@ -13,6 +13,10 @@ class ChatAgent(BaseAgent):
     maintains conversation history.
     """
 
+    def _setup_events(self) -> None:
+        """Subscribe to relevant events."""
+        pass
+
     async def run(self, user_input: str, **kwargs: Any) -> LLMResponse:
         """Process user input and return a response.
 

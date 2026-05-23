@@ -1,7 +1,5 @@
 """Tests for Level 3: Memory + RAG."""
 
-import pytest
-
 from lcode.memory.conversation import InMemoryMemory, SQLiteMemory
 from lcode.rag.loader import Document, DocumentLoader
 

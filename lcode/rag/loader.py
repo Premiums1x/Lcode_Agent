@@ -32,9 +32,13 @@ class DocumentLoader:
             return DocumentLoader._split_markdown(text, str(path))
         elif ext == ".json":
             import json
+
             data = json.loads(text)
             if isinstance(data, list):
-                return [Document(content=json.dumps(item), metadata={"source": str(path), "index": i}) for i, item in enumerate(data)]
+                return [
+                    Document(content=json.dumps(item), metadata={"source": str(path), "index": i})
+                    for i, item in enumerate(data)
+                ]
             return [Document(content=text, metadata={"source": str(path)})]
         elif ext == ".csv":
             return DocumentLoader._split_csv(text, str(path))
@@ -56,14 +60,18 @@ class DocumentLoader:
         return docs
 
     @staticmethod
-    def _split_text(text: str, source: str, chunk_size: int = 512, overlap: int = 50) -> list[Document]:
+    def _split_text(
+        text: str, source: str, chunk_size: int = 512, overlap: int = 50
+    ) -> list[Document]:
         """Split text into overlapping chunks."""
         chunks = []
         start = 0
         while start < len(text):
             end = min(start + chunk_size, len(text))
             chunk = text[start:end]
-            chunks.append(Document(content=chunk, metadata={"source": source, "chunk_start": start}))
+            chunks.append(
+                Document(content=chunk, metadata={"source": source, "chunk_start": start})
+            )
             start += chunk_size - overlap
             if start >= len(text):
                 break
@@ -76,8 +84,9 @@ class DocumentLoader:
     def _split_markdown(text: str, source: str) -> list[Document]:
         """Split markdown by headers."""
         import re
+
         # Split by ## or ### headers
-        sections = re.split(r'\n(?=#{1,3} )', text)
+        sections = re.split(r"\n(?=#{1,3} )", text)
         docs = []
         for i, section in enumerate(sections):
             section = section.strip()
@@ -90,5 +99,9 @@ class DocumentLoader:
         """Split CSV into row documents."""
         import csv
         import io
+
         reader = csv.DictReader(io.StringIO(text))
-        return [Document(content=str(row), metadata={"source": source, "row": i}) for i, row in enumerate(reader)]
+        return [
+            Document(content=str(row), metadata={"source": source, "row": i})
+            for i, row in enumerate(reader)
+        ]

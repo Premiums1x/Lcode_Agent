@@ -4,7 +4,7 @@ import pytest
 
 from lcode.agents.react_agent import ReActAgent
 from lcode.llm.base import LLMResponse, Message
-from lcode.tools.registry import ToolRegistry, tool_registry
+from lcode.tools.registry import ToolRegistry
 
 
 class MockLLMProvider:
@@ -98,9 +98,11 @@ class TestReActAgent:
     @pytest.mark.asyncio
     async def test_react_without_tools(self) -> None:
         """Test ReAct agent without tool calls."""
-        llm = MockLLMProvider([
-            LLMResponse(content="Simple answer.", model="mock"),
-        ])
+        llm = MockLLMProvider(
+            [
+                LLMResponse(content="Simple answer.", model="mock"),
+            ]
+        )
         registry = ToolRegistry()
         agent = ReActAgent(name="test", llm=llm, tool_registry=registry)
 
@@ -117,21 +119,25 @@ class TestReActAgent:
             return "42"
 
         # First response: tool call, Second: final answer
-        llm = MockLLMProvider([
-            LLMResponse(
-                content="I'll check.",
-                model="mock",
-                tool_calls=[{
-                    "id": "call_1",
-                    "type": "function",
-                    "function": {
-                        "name": "get_number",
-                        "arguments": "{}",
-                    },
-                }],
-            ),
-            LLMResponse(content="The number is 42.", model="mock"),
-        ])
+        llm = MockLLMProvider(
+            [
+                LLMResponse(
+                    content="I'll check.",
+                    model="mock",
+                    tool_calls=[
+                        {
+                            "id": "call_1",
+                            "type": "function",
+                            "function": {
+                                "name": "get_number",
+                                "arguments": "{}",
+                            },
+                        }
+                    ],
+                ),
+                LLMResponse(content="The number is 42.", model="mock"),
+            ]
+        )
 
         agent = ReActAgent(name="test", llm=llm, tool_registry=registry)
         response = await agent.run("What is the number?")

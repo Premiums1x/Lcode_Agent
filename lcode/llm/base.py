@@ -1,8 +1,9 @@
 """Base LLM provider abstraction."""
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, AsyncIterator
+from typing import Any
 
 
 @dataclass
@@ -41,6 +42,8 @@ class LLMResponse:
 class BaseLLMProvider(ABC):
     """Abstract base class for LLM providers."""
 
+    default_model: str = ""
+
     @abstractmethod
     async def chat(
         self,
@@ -67,7 +70,7 @@ class BaseLLMProvider(ABC):
         ...
 
     @abstractmethod
-    async def chat_stream(
+    def chat_stream(
         self,
         messages: list[Message],
         model: str | None = None,
@@ -83,7 +86,7 @@ class BaseLLMProvider(ABC):
         ...
 
     @abstractmethod
-    async def embed(self, texts: list[str], model: str | None = None) -> list[list[float]]:
+    def embed(self, texts: list[str], model: str | None = None) -> list[list[float]]:
         """Generate embeddings for texts.
 
         Args:
