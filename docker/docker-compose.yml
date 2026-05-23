@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  lcode:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: lcode
+    ports:
+      - "8000:8000"
+    volumes:
+      - lcode_data:/app/data
+      - lcode_plugins:/app/plugins
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-gpt-4o-mini}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  lcode_data:
+  lcode_plugins:
