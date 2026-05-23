@@ -11,12 +11,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy dependency definitions
 COPY pyproject.toml README.md ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -e ".[all]"
-
 # Copy application code
 COPY lcode/ ./lcode/
 COPY examples/ ./examples/
+
+# Install Python dependencies (non-editable for Docker)
+RUN pip install --no-cache-dir ".[all]"
 
 # Create data directories
 RUN mkdir -p /app/data /app/plugins
