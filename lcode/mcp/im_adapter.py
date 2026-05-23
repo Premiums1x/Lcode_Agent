@@ -127,17 +127,21 @@ async def im_websocket(websocket: WebSocket) -> None:
                     platform=payload.get("platform", "websocket"),
                 )
                 response = await adapter.handle_message(message)
-                await websocket.send_json({
-                    "type": "response",
-                    "content": response,
-                })
+                await websocket.send_json(
+                    {
+                        "type": "response",
+                        "content": response,
+                    }
+                )
             except json.JSONDecodeError:
                 # Treat raw text as message content
                 message = IMMessage(sender="websocket_user", content=data, platform="websocket")
                 response = await adapter.handle_message(message)
-                await websocket.send_json({
-                    "type": "response",
-                    "content": response,
-                })
+                await websocket.send_json(
+                    {
+                        "type": "response",
+                        "content": response,
+                    }
+                )
     except WebSocketDisconnect:
         pass

@@ -1,6 +1,5 @@
 """Configuration management using Pydantic Settings."""
 
-import os
 from pathlib import Path
 from typing import Literal
 
@@ -22,14 +21,18 @@ class Settings(BaseSettings):
 
     # LLM Configuration
     openai_api_key: str = Field(default="", description="OpenAI API key")
-    openai_base_url: str = Field(default="https://api.openai.com/v1", description="OpenAI-compatible API base URL")
+    openai_base_url: str = Field(
+        default="https://api.openai.com/v1", description="OpenAI-compatible API base URL"
+    )
     default_model: str = Field(default="gpt-4o-mini", description="Default LLM model")
     default_temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     default_max_tokens: int = Field(default=4096, ge=1)
 
     # DeepSeek Support (uses OpenAI-compatible API)
     deepseek_api_key: str = Field(default="", description="DeepSeek API key")
-    deepseek_base_url: str = Field(default="https://api.deepseek.com/v1", description="DeepSeek API base URL")
+    deepseek_base_url: str = Field(
+        default="https://api.deepseek.com/v1", description="DeepSeek API base URL"
+    )
 
     # Framework Settings
     app_name: str = Field(default="LCode")
@@ -40,7 +43,9 @@ class Settings(BaseSettings):
     memory_type: Literal["in_memory", "sqlite", "redis"] = Field(default="sqlite")
     memory_db_path: Path = Field(default=Path("./data/lcode_memory.db"))
     vector_db_path: Path = Field(default=Path("./data/vector_db"))
-    embedding_model: str = Field(default="BAAI/bge-small-zh-v1.5", description="Sentence-transformers model for embeddings")
+    embedding_model: str = Field(
+        default="BAAI/bge-small-zh-v1.5", description="Sentence-transformers model for embeddings"
+    )
     chunk_size: int = Field(default=512)
     chunk_overlap: int = Field(default=50)
     top_k: int = Field(default=5)

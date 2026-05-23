@@ -3,8 +3,8 @@
 Supports OpenAI, DeepSeek, and any other OpenAI-compatible API.
 """
 
-import json
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
 from openai import AsyncOpenAI
@@ -28,7 +28,9 @@ class OpenAIProvider(BaseLLMProvider):
         self.default_model = default_model or config["model"]
 
         if not self.api_key:
-            raise ValueError("API key is required. Set OPENAI_API_KEY or DEEPSEEK_API_KEY in environment.")
+            raise ValueError(
+                "API key is required. Set OPENAI_API_KEY or DEEPSEEK_API_KEY in environment."
+            )
 
         self.client = AsyncOpenAI(
             api_key=self.api_key,
@@ -109,7 +111,7 @@ class OpenAIProvider(BaseLLMProvider):
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
-    async def embed(self, texts: list[str], model: str | None = None) -> list[list[float]]:
+    def embed(self, texts: list[str], model: str | None = None) -> list[list[float]]:
         """Generate embeddings using OpenAI embedding API.
 
         Falls back to sentence-transformers if no embedding model is specified.
@@ -120,4 +122,5 @@ class OpenAIProvider(BaseLLMProvider):
 
         embedder = SentenceTransformer(settings.embedding_model)
         embeddings = embedder.encode(texts, convert_to_numpy=True, show_progress_bar=False)
-        return embeddings.tolist()
+        result: list[list[float]] = embeddings.tolist()
+        return result

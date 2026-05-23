@@ -7,7 +7,8 @@ Provides:
 - Real-time streaming via WebSocket
 """
 
-import asyncio
+import os
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -16,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
+from lcode.agents.base import BaseAgent
 from lcode.agents.chat_agent import ChatAgent
 from lcode.agents.rag_agent import RAGAgent
 from lcode.agents.react_agent import ReActAgent
@@ -26,16 +28,17 @@ from lcode.mcp.server import router as mcp_router
 from lcode.observability.tracer import tracer
 from lcode.tools.registry import tool_registry
 
-
 # In-memory agent instances (in production, use proper state management)
 _agent_instances: dict[str, Any] = {}
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
     """Application lifespan handler."""
     # Startup
-    print(f"🚀 {settings.app_name} Web UI starting on http://{settings.web_host}:{settings.web_port}")
+    print(
+        f"🚀 {settings.app_name} Web UI starting on http://{settings.web_host}:{settings.web_port}"
+    )
     yield
     # Shutdown
     print("👋 Shutting down")
@@ -62,7 +65,6 @@ app.add_middleware(
 )
 
 # Try to mount static files
-import os
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
@@ -313,6 +315,7 @@ async def websocket_endpoint(websocket: WebSocket, agent_type: str) -> None:
     agent_key = f"ws_{agent_type}_{id(websocket)}"
     if agent_key not in _agent_instances:
         llm = OpenAIProvider()
+        agent: BaseAgent
         if agent_type == "chat":
             agent = ChatAgent(name="chat", llm=llm)
         elif agent_type == "react":
@@ -326,15 +329,21 @@ async def websocket_endpoint(websocket: WebSocket, agent_type: str) -> None:
     agent = _agent_instances[agent_key]
 
     # Send initial config with model and tools info
-    tools_data = [
-        {"name": tool.name, "description": tool.description}
-        for tool in tool_registry.list_tools()
-    ] if agent_type == "react" else []
-    await websocket.send_json({
-        "type": "config",
-        "model": agent.llm.default_model,
-        "tools": tools_data,
-    })
+    tools_data = (
+        [
+            {"name": tool.name, "description": tool.description}
+            for tool in tool_registry.list_tools()
+        ]
+        if agent_type == "react"
+        else []
+    )
+    await websocket.send_json(
+        {
+            "type": "config",
+            "model": agent.llm.default_model,
+            "tools": tools_data,
+        }
+    )
 
     try:
         while True:
@@ -347,11 +356,13 @@ async def websocket_endpoint(websocket: WebSocket, agent_type: str) -> None:
             with tracer.start_trace("websocket_chat", agent=agent_type):
                 response = await agent.run(user_message)
 
-            await websocket.send_json({
-                "type": "message",
-                "content": response.content,
-                "model": response.model,
-            })
+            await websocket.send_json(
+                {
+                    "type": "message",
+                    "content": response.content,
+                    "model": response.model,
+                }
+            )
 
     except WebSocketDisconnect:
         # Cleanup
@@ -364,8 +375,8 @@ async def websocket_endpoint(websocket: WebSocket, agent_type: str) -> None:
 @app.post("/api/ingest")
 async def ingest_document(file_path: str) -> dict[str, Any]:
     """Ingest a document for RAG."""
-    from lcode.rag.vector_store import VectorStore
     from lcode.rag.loader import DocumentLoader
+    from lcode.rag.vector_store import VectorStore
 
     docs = DocumentLoader.load_file(file_path)
     store = VectorStore()

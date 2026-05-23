@@ -135,14 +135,11 @@ class AgentManager:
             else:
                 json_str = content
 
-            return json.loads(json_str)
+            parsed: dict[str, Any] = json.loads(json_str)
+            return parsed
         except json.JSONDecodeError:
             # Fallback: single task
-            return {
-                "tasks": [
-                    {"id": "1", "description": task_description, "agent": "any"}
-                ]
-            }
+            return {"tasks": [{"id": "1", "description": task_description, "agent": "any"}]}
 
     def _select_agent(self, task: Task) -> BaseAgent | None:
         """Select the best agent for a task."""

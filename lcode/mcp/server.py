@@ -64,11 +64,13 @@ class MCPServer:
     def _list_tools(self, req_id: Any) -> dict[str, Any]:
         tools = []
         for tool in tool_registry.list_tools():
-            tools.append({
-                "name": tool.name,
-                "description": tool.description,
-                "inputSchema": tool.parameters,
-            })
+            tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "inputSchema": tool.parameters,
+                }
+            )
         return {
             "jsonrpc": "2.0",
             "id": req_id,
@@ -80,6 +82,7 @@ class MCPServer:
         arguments = params.get("arguments", {})
 
         import asyncio
+
         try:
             result = asyncio.run(tool_registry.execute(tool_name, arguments))
             return {

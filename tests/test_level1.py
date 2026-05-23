@@ -90,7 +90,11 @@ class TestSettings:
 
     def test_effective_llm_config(self) -> None:
         """Test LLM config resolution."""
-        settings = Settings(openai_api_key="test-key")
+        # Clear any existing keys to test OpenAI fallback
+        settings = Settings(
+            openai_api_key="test-key",
+            deepseek_api_key="",
+        )
         config = settings.effective_llm_config
         assert config["api_key"] == "test-key"
         assert config["base_url"] == "https://api.openai.com/v1"

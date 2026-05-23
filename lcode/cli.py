@@ -13,6 +13,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from lcode.agents.base import BaseAgent
 from lcode.agents.chat_agent import ChatAgent
 from lcode.agents.rag_agent import RAGAgent
 from lcode.agents.react_agent import ReActAgent
@@ -20,9 +21,12 @@ from lcode.core.config import settings
 from lcode.llm.openai_provider import OpenAIProvider
 from lcode.observability.tracer import tracer
 from lcode.plugins.loader import plugin_loader
-from lcode.tools.builtin import calculator, python_executor, web_search  # noqa: F401 - registers tools
+from lcode.tools.builtin import (  # noqa: F401 - registers tools
+    calculator,
+    python_executor,
+    web_search,
+)
 from lcode.tools.registry import Tool, tool_registry
-from lcode.web.app import app as web_app
 
 console = Console()
 cli = typer.Typer(
@@ -46,9 +50,7 @@ def _print_banner() -> None:
     console.print(Panel(banner, title="Welcome", border_style="cyan"))
 
 
-def _print_session_info(
-    agent_type: str, model: str, temperature: float, tools: list[Tool]
-) -> None:
+def _print_session_info(agent_type: str, model: str, temperature: float, tools: list[Tool]) -> None:
     """Print session info on the right side, once at startup."""
     # Build info content
     info_table = Table(show_header=False, box=None, padding=(0, 1))
@@ -66,8 +68,7 @@ def _print_session_info(
 
     # Left side: welcome text; Right side: info panel
     welcome = Text(
-        "Welcome to LCode!\nStart chatting below.\n\n"
-        "[dim]Type 'exit' or 'quit' to end.[/dim]",
+        "Welcome to LCode!\nStart chatting below.\n\n[dim]Type 'exit' or 'quit' to end.[/dim]",
         style="",
     )
 
@@ -96,11 +97,14 @@ def chat(
         llm = OpenAIProvider(default_model=model)
     except ValueError as e:
         console.print(f"[red]Error: {e}[/red]")
-        console.print("[yellow]Please set OPENAI_API_KEY or DEEPSEEK_API_KEY environment variable.[/yellow]")
-        raise typer.Exit(1)
+        console.print(
+            "[yellow]Please set OPENAI_API_KEY or DEEPSEEK_API_KEY environment variable.[/yellow]"
+        )
+        raise typer.Exit(1) from e
 
     # Create agent
     tools_list: list[Tool] = []
+    agent: BaseAgent
     if agent_type == "react":
         agent = ReActAgent(name="react", llm=llm, tool_registry=tool_registry)
         tools_list = tool_registry.list_tools()
@@ -110,10 +114,10 @@ def chat(
         agent = ChatAgent(name="chat", llm=llm)
 
     # Print session info ONCE — right side, never re-rendered
-    _print_session_info(agent_type, agent.llm.default_model, temperature, tools_list)
+    _print_session_info(agent_type, llm.default_model, temperature, tools_list)
 
     # Prompt always shows key info so user never loses context
-    prompt = f"[bold cyan][{agent_type.upper()} | {agent.llm.default_model}][/] You: "
+    prompt = f"[bold cyan][{agent_type.upper()} | {llm.default_model}][/] You: "
 
     async def _run_chat() -> None:
         with tracer.start_trace("cli_chat_session", agent=agent_type):
@@ -135,9 +139,17 @@ def chat(
                     # Render response
                     if any(c in response.content for c in ["#", "*", "`", "|"]):
                         md = Markdown(response.content)
-                        console.print(Panel(md, title="[bold green]LCode[/bold green]", border_style="green"))
+                        console.print(
+                            Panel(md, title="[bold green]LCode[/bold green]", border_style="green")
+                        )
                     else:
-                        console.print(Panel(response.content, title="[bold green]LCode[/bold green]", border_style="green"))
+                        console.print(
+                            Panel(
+                                response.content,
+                                title="[bold green]LCode[/bold green]",
+                                border_style="green",
+                            )
+                        )
 
                 except KeyboardInterrupt:
                     console.print("\n[dim]Interrupted. Type 'exit' to quit.[/dim]")

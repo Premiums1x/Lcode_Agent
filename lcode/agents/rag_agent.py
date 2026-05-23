@@ -3,7 +3,7 @@
 from typing import Any
 
 from lcode.agents.base import BaseAgent
-from lcode.llm.base import LLMResponse, Message
+from lcode.llm.base import LLMResponse
 from lcode.rag.loader import DocumentLoader
 from lcode.rag.vector_store import VectorStore
 
@@ -25,6 +25,10 @@ class RAGAgent(BaseAgent):
     ) -> None:
         super().__init__(name, llm, system_prompt)
         self.vector_store = vector_store or VectorStore()
+
+    def _setup_events(self) -> None:
+        """Subscribe to relevant events."""
+        pass
 
     async def ingest(self, file_path: str) -> int:
         """Ingest documents from a file into the vector store.

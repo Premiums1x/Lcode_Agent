@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from lcode.core.events import event_bus
 from lcode.llm.base import BaseLLMProvider, LLMResponse, Message
 
 
@@ -22,6 +21,7 @@ class BaseAgent(ABC):
         self.message_history: list[Message] = []
         self._setup_events()
 
+    @abstractmethod
     def _setup_events(self) -> None:
         """Subscribe to relevant events. Override in subclass."""
         pass
