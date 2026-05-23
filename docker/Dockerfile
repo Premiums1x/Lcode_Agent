@@ -17,7 +17,6 @@ RUN pip install --no-cache-dir -e ".[all]"
 # Copy application code
 COPY lcode/ ./lcode/
 COPY examples/ ./examples/
-COPY docs/ ./docs/
 
 # Create data directories
 RUN mkdir -p /app/data /app/plugins
