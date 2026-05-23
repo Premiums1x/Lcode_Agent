@@ -62,6 +62,9 @@ jobs:
       - name: Test Docker healthcheck
         run: |
           docker run -d --name lcode-test -p 8000:8000 lcode:latest
-          sleep 10
-          curl -f http://localhost:8000/api/health || exit 1
+          for i in {1..15}; do
+            sleep 2
+            curl -f http://localhost:8000/api/health && break
+            if [ "$i" -eq 15 ]; then exit 1; fi
+          done
           docker stop lcode-test
