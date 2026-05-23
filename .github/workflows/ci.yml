@@ -1,0 +1,67 @@
+name: LCode CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: |
+          uv pip install -e ".[dev]"
+
+      - name: Lint with Ruff
+        run: |
+          ruff check lcode tests
+          ruff format --check lcode tests
+
+      - name: Type check with mypy
+        run: |
+          mypy lcode
+
+      - name: Test with pytest
+        run: |
+          pytest --cov=lcode --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -f docker/Dockerfile -t lcode:latest .
+
+      - name: Test Docker healthcheck
+        run: |
+          docker run -d --name lcode-test -p 8000:8000 lcode:latest
+          sleep 10
+          curl -f http://localhost:8000/api/health || exit 1
+          docker stop lcode-test

@@ -1,0 +1,203 @@
+
+<h2 class="sr-only">lcode 项目结构图 — 根目录与 lcode/ 主包模块总览</h2>
+<style>
+.ps { padding: 1rem 0; }
+.ps-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 8px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; }
+.badge i { font-size: 12px; }
+.mod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mc { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 10px 10px 10px 14px; position: relative; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+.mc:hover { border-color: var(--color-border-primary); }
+.mc::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+.mc.purple::before { background: #7F77DD; }
+.mc.teal::before   { background: #1D9E75; }
+.mc.blue::before   { background: #378ADD; }
+.mc.amber::before  { background: #BA7517; }
+.mc.coral::before  { background: #D85A30; }
+.mc.gray::before   { background: #888780; }
+.mc-name { font-size: 12px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 5px; margin: 0 0 2px; }
+.mc-name i { font-size: 14px; }
+.mc-role { font-size: 11px; color: var(--color-text-secondary); margin: 0 0 6px; line-height: 1.4; }
+.mc-files { display: flex; flex-wrap: wrap; gap: 3px; }
+.mc-file { font-size: 11px; font-family: var(--font-mono); color: var(--color-text-tertiary); background: var(--color-background-tertiary); padding: 1px 5px; border-radius: 4px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 3px; vertical-align: middle; }
+.divider { height: 0.5px; background: var(--color-border-tertiary); flex: 1; }
+.sub-card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 10px 12px; }
+.sub-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 6px; display: flex; align-items: center; gap: 5px; }
+.sub-title i { font-size: 14px; }
+.sub-item { font-size: 11px; color: var(--color-text-secondary); line-height: 1.6; }
+</style>
+
+<div class="ps">
+
+  <p class="ps-label">Project root</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;">
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>lcode/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>tests/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>examples/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>docs/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>assets/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>data/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>docker/</span>
+    <span class="badge"><i class="ti ti-folder" aria-hidden="true"></i>.github/workflows/</span>
+    <span class="badge"><i class="ti ti-file" aria-hidden="true"></i>pyproject.toml</span>
+    <span class="badge"><i class="ti ti-file" aria-hidden="true"></i>.env / .env.example</span>
+    <span class="badge"><i class="ti ti-file" aria-hidden="true"></i>README.md</span>
+    <span class="badge"><i class="ti ti-file" aria-hidden="true"></i>PROGRESS.md</span>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+    <p class="ps-label" style="margin: 0; white-space: nowrap;">lcode/ main package</p>
+    <div class="divider"></div>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 11px; color: var(--color-text-secondary);">
+    <span><span class="dot" style="background:#7F77DD;"></span>Agent layer</span>
+    <span><span class="dot" style="background:#1D9E75;"></span>Core infra</span>
+    <span><span class="dot" style="background:#378ADD;"></span>LLM / Tools</span>
+    <span><span class="dot" style="background:#BA7517;"></span>Data</span>
+    <span><span class="dot" style="background:#D85A30;"></span>Web / Comms</span>
+    <span><span class="dot" style="background:#888780;"></span>System</span>
+  </div>
+
+  <div class="mod-grid">
+
+    <div class="mc purple" onclick="sendPrompt('介绍一下 lcode 中 agents/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-robot" aria-hidden="true"></i>agents/</p>
+      <p class="mc-role">Agent 实现层</p>
+      <div class="mc-files">
+        <span class="mc-file">base.py</span>
+        <span class="mc-file">chat_agent.py</span>
+        <span class="mc-file">react_agent.py</span>
+        <span class="mc-file">rag_agent.py</span>
+      </div>
+    </div>
+
+    <div class="mc teal" onclick="sendPrompt('介绍一下 lcode 中 core/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-settings" aria-hidden="true"></i>core/</p>
+      <p class="mc-role">核心基础设施</p>
+      <div class="mc-files">
+        <span class="mc-file">config.py</span>
+        <span class="mc-file">events.py</span>
+      </div>
+    </div>
+
+    <div class="mc blue" onclick="sendPrompt('介绍一下 lcode 中 llm/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-message-2" aria-hidden="true"></i>llm/</p>
+      <p class="mc-role">LLM API 抽象层</p>
+      <div class="mc-files">
+        <span class="mc-file">base.py</span>
+        <span class="mc-file">openai_provider.py</span>
+      </div>
+    </div>
+
+    <div class="mc blue" onclick="sendPrompt('介绍一下 lcode 中 tools/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-tool" aria-hidden="true"></i>tools/</p>
+      <p class="mc-role">工具注册与内置工具</p>
+      <div class="mc-files">
+        <span class="mc-file">registry.py</span>
+        <span class="mc-file">builtin.py</span>
+      </div>
+    </div>
+
+    <div class="mc amber" onclick="sendPrompt('介绍一下 lcode 中 memory/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-database" aria-hidden="true"></i>memory/</p>
+      <p class="mc-role">记忆管理</p>
+      <div class="mc-files">
+        <span class="mc-file">conversation.py</span>
+      </div>
+    </div>
+
+    <div class="mc amber" onclick="sendPrompt('介绍一下 lcode 中 rag/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-search" aria-hidden="true"></i>rag/</p>
+      <p class="mc-role">检索增强生成</p>
+      <div class="mc-files">
+        <span class="mc-file">loader.py</span>
+        <span class="mc-file">vector_store.py</span>
+      </div>
+    </div>
+
+    <div class="mc coral" onclick="sendPrompt('介绍一下 lcode 中 orchestration/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-sitemap" aria-hidden="true"></i>orchestration/</p>
+      <p class="mc-role">多 Agent 编排</p>
+      <div class="mc-files">
+        <span class="mc-file">manager.py</span>
+      </div>
+    </div>
+
+    <div class="mc coral" onclick="sendPrompt('介绍一下 lcode 中 web/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-browser" aria-hidden="true"></i>web/</p>
+      <p class="mc-role">FastAPI + WebSocket UI</p>
+      <div class="mc-files">
+        <span class="mc-file">app.py</span>
+      </div>
+    </div>
+
+    <div class="mc coral" onclick="sendPrompt('介绍一下 lcode 中 mcp/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-plug" aria-hidden="true"></i>mcp/</p>
+      <p class="mc-role">协议适配</p>
+      <div class="mc-files">
+        <span class="mc-file">server.py</span>
+        <span class="mc-file">im_adapter.py</span>
+      </div>
+    </div>
+
+    <div class="mc gray" onclick="sendPrompt('介绍一下 lcode 中 plugins/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-puzzle" aria-hidden="true"></i>plugins/</p>
+      <p class="mc-role">插件与技能系统</p>
+      <div class="mc-files">
+        <span class="mc-file">loader.py</span>
+      </div>
+    </div>
+
+    <div class="mc gray" onclick="sendPrompt('介绍一下 lcode 中 observability/ 模块的设计')">
+      <p class="mc-name"><i class="ti ti-chart-bar" aria-hidden="true"></i>observability/</p>
+      <p class="mc-role">链路追踪与日志</p>
+      <div class="mc-files">
+        <span class="mc-file">tracer.py</span>
+      </div>
+    </div>
+
+    <div class="mc gray" onclick="sendPrompt('介绍一下 lcode 的 cli.py 命令设计')">
+      <p class="mc-name"><i class="ti ti-terminal-2" aria-hidden="true"></i>cli.py</p>
+      <p class="mc-role">命令行入口</p>
+      <div class="mc-files">
+        <span class="mc-file">chat</span>
+        <span class="mc-file">server</span>
+        <span class="mc-file">ingest</span>
+        <span class="mc-file">tools</span>
+        <span class="mc-file">plugins</span>
+        <span class="mc-file">config</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+
+    <div class="sub-card">
+      <p class="sub-title"><i class="ti ti-flask" aria-hidden="true"></i>tests/</p>
+      <div>
+        <p class="sub-item">test_level1.py — ChatAgent 对话</p>
+        <p class="sub-item">test_level2.py — ReActAgent + 工具</p>
+        <p class="sub-item">test_level3.py — Memory + RAG</p>
+        <p class="sub-item">test_level4.py — AgentManager + EventBus</p>
+        <p class="sub-item">test_level5.py — Tracer + Web + Docker</p>
+      </div>
+    </div>
+
+    <div class="sub-card">
+      <p class="sub-title"><i class="ti ti-code" aria-hidden="true"></i>examples/</p>
+      <div>
+        <p class="sub-item">01_chat.py — 单 Agent 对话</p>
+        <p class="sub-item">02_react_tools.py — ReAct 工具调用</p>
+        <p class="sub-item">03_rag.py — RAG 文档问答</p>
+        <p class="sub-item">04_multi_agent.py — 多 Agent 协作</p>
+        <p class="sub-item">05_web_ui.py — 启动 Web 服务</p>
+        <p class="sub-item">06_plugins.py — 插件发现 + 技能注册</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
