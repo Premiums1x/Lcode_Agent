@@ -61,10 +61,18 @@ jobs:
 
       - name: Test Docker healthcheck
         run: |
-          docker run -d --name lcode-test -p 8000:8000 lcode:latest
-          for i in {1..15}; do
+          docker run -d --name lcode-test -p 8000:8000 \
+            -e OPENAI_API_KEY=dummy \
+            -e DEEPSEEK_API_KEY=dummy \
+            lcode:latest
+          sleep 5
+          docker logs lcode-test || true
+          for i in {1..20}; do
             sleep 2
             curl -f http://localhost:8000/api/health && break
-            if [ "$i" -eq 15 ]; then exit 1; fi
+            if [ "$i" -eq 20 ]; then
+              docker logs lcode-test
+              exit 1
+            fi
           done
           docker stop lcode-test
