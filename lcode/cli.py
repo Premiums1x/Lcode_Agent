@@ -4,6 +4,7 @@ Level 1 requirement: Command-line runnable.
 """
 
 import asyncio
+from pathlib import Path
 from typing import Any
 
 import typer
@@ -12,6 +13,11 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.history import FileHistory
 
 from lcode.agents.base import BaseAgent
 from lcode.agents.chat_agent import ChatAgent
@@ -83,6 +89,20 @@ def _print_session_info(agent_type: str, model: str, temperature: float, tools: 
     console.print()
 
 
+def _print_help() -> None:
+    """Print available slash commands and shortcuts."""
+    help_table = Table(show_header=False, box=None, padding=(0, 2))
+    help_table.add_column("Command", style="bold cyan")
+    help_table.add_column("Description")
+    help_table.add_row("/exit, /quit", "End the session (also: 'exit', 'quit', 'q')")
+    help_table.add_row("/clear", "Clear the terminal screen")
+    help_table.add_row("/reset", "Reset conversation history")
+    help_table.add_row("/tools", "List available tools")
+    help_table.add_row("/help", "Show this help message")
+    help_table.add_row('""" ... """', 'Enter multi-line mode (start & end with """)')
+    console.print(Panel(help_table, title="[bold]Help[/bold]", border_style="cyan"))
+
+
 @cli.command()
 def chat(
     model: str = typer.Option(settings.default_model, "--model", "-m", help="LLM model to use"),
@@ -117,20 +137,66 @@ def chat(
     _print_session_info(agent_type, llm.default_model, temperature, tools_list)
 
     # Prompt always shows key info so user never loses context
-    prompt = f"[bold cyan][{agent_type.upper()} | {llm.default_model}][/] You: "
+    prompt_html = HTML(
+        f"<b><cyan>[{agent_type.upper()} | {llm.default_model}]</cyan></b> You: "
+    )
+
+    # Setup prompt_toolkit session with persistent history & slash-command completion
+    history_path = Path.home() / ".lcode_history"
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    slash_completer = WordCompleter(
+        ["/exit", "/quit", "/clear", "/reset", "/help", "/tools"],
+    )
+    prompt_session = PromptSession(
+        history=FileHistory(str(history_path)),
+        completer=slash_completer,
+    )
 
     async def _run_chat() -> None:
         with tracer.start_trace("cli_chat_session", agent=agent_type):
             while True:
                 try:
-                    user_input = console.input(prompt)
+                    user_input = await prompt_session.prompt_async(prompt_html)
                     user_input = user_input.strip()
 
-                    if user_input.lower() in {"exit", "quit", "q"}:
+                    # Multi-line mode triggered by """
+                    if user_input == '"""':
+                        lines: list[str] = []
+                        multiline_prompt = HTML("<dim>... </dim>")
+                        while True:
+                            line = await prompt_session.prompt_async(multiline_prompt)
+                            if line.strip() == '"""':
+                                break
+                            lines.append(line)
+                        user_input = "\n".join(lines)
+
+                    if user_input.lower() in {
+                        "exit",
+                        "quit",
+                        "q",
+                        "/exit",
+                        "/quit",
+                    }:
                         console.print("[dim]Goodbye![/dim]")
                         break
 
                     if not user_input:
+                        continue
+
+                    # Slash commands
+                    cmd = user_input.lower()
+                    if cmd == "/clear":
+                        console.clear()
+                        continue
+                    if cmd == "/reset":
+                        agent.reset()
+                        console.print("[dim]Conversation history reset.[/dim]")
+                        continue
+                    if cmd == "/help":
+                        _print_help()
+                        continue
+                    if cmd == "/tools":
+                        tools()
                         continue
 
                     with console.status("[bold green]Thinking...[/bold green]"):
@@ -153,6 +219,9 @@ def chat(
 
                 except KeyboardInterrupt:
                     console.print("\n[dim]Interrupted. Type 'exit' to quit.[/dim]")
+                except EOFError:
+                    console.print("\n[dim]Goodbye![/dim]")
+                    break
                 except Exception as e:
                     console.print(f"[red]Error: {e}[/red]")
 
