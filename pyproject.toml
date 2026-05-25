@@ -40,6 +40,7 @@ dependencies = [
     "watchdog>=4.0",
     "aiofiles>=23.0",
     "tenacity>=8.0",
+    "prompt-toolkit>=3.0.0",
 ]
 
 [project.optional-dependencies]
