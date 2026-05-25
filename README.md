@@ -15,7 +15,7 @@
 | **向量库** | ChromaDB + sentence-transformers | 本地 Embedding，零 API 成本 |
 | **配置** | Pydantic Settings | `.env` 环境变量管理 |
 | **日志** | structlog + loguru | 结构化 JSON 日志 |
-| **CLI** | typer + rich | 现代终端交互体验 |
+| **CLI** | typer + rich + prompt_toolkit | 现代终端交互体验（历史记录、Tab 补全、多行输入）|
 | **测试** | pytest + pytest-asyncio | 异步测试支持 |
 | **部署** | Docker + docker-compose | CI/CD 通过 GitHub Actions |
 
@@ -101,7 +101,7 @@
 
 | 入口 | 说明 |
 |------|------|
-| `lcode chat --agent react` | CLI REPL，创建 `OpenAIProvider` + 对应 Agent，循环收发消息，整个会话包裹在 `TraceSpan` 中 |
+| `lcode chat --agent react` | CLI REPL，基于 `prompt_toolkit` 的增强输入框，支持历史记录、Tab 补全、多行输入及斜杠命令 |
 | `lcode server` | 启动 FastAPI + Uvicorn，WebSocket `/ws/{agent_type}` 每连接创建一个 Agent 实例 |
 | `POST /mcp/` | JSON-RPC，由 `MCPServer` 处理工具发现与调用 |
 | `POST /im/webhook` | IM 适配器，`WebhookAdapter` 通过 HTTP 接入即时通讯平台 |
@@ -136,6 +136,30 @@ pip install -e ".[all]"
 ```bash
 lcode chat
 ```
+
+#### 增强的终端输入体验
+
+LCode CLI 采用 `prompt_toolkit` 提供现代终端交互，相比原生 `input()` 具备以下能力：
+
+| 功能 | 快捷键 / 触发方式 | 说明 |
+|------|------------------|------|
+| **历史记录** | `↑` / `↓` | 召回之前输入过的内容，历史自动持久化到 `~/.lcode_history` |
+| **Tab 补全** | `/` + `Tab` | 输入斜杠命令前缀后自动补全可用命令 |
+| **多行输入** | `"""` + `Enter` | 输入 `"""` 进入多行模式，再次输入 `"""` 结束，适合粘贴代码或长 Prompt |
+| **快捷操作** | `Ctrl+A` / `Ctrl+E` / `Ctrl+K` | 行首、行尾、删除至行尾（Emacs 风格快捷键）|
+| **优雅退出** | `Ctrl+D` / `Ctrl+Z`+`Enter` | EOF 信号安全退出会话 |
+
+#### 内置斜杠命令
+
+在对话过程中输入以下命令可直接执行对应操作：
+
+| 命令 | 作用 |
+|------|------|
+| `/exit` 或 `/quit` | 结束当前会话（等价于输入 `exit` / `quit` / `q`）|
+| `/clear` | 清屏 |
+| `/reset` | 重置当前 Agent 的对话历史 |
+| `/help` | 显示可用命令帮助 |
+| `/tools` | 列出当前已注册的工具 |
 
 ### Web UI
 
